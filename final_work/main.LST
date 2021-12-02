@@ -1,0 +1,359 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN main.OBJ
+ASSEMBLER INVOKED BY: D:\keil4\C51\BIN\A51.EXE main.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+  00C0                 1     NUM0 EQU 11000000B
+  00F9                 2     NUM1 EQU 11111001B
+  00A4                 3     NUM2 EQU 10100100B
+  00B0                 4     NUM3 EQU 10110000B
+  0099                 5     NUM4 EQU 10011001B
+  0092                 6     NUM5 EQU 10010010B
+  0082                 7     NUM6 EQU 10000010B
+  00F8                 8     NUM7 EQU 11111000B
+  0080                 9     NUM8 EQU 10000000B
+  0090                10     NUM9 EQU 10010000B
+  0035                11     MOD_CHOSE EQU 35H
+  0036                12     SET_WHITCH EQU 36H
+  0037                13     DPTL EQU 37H
+  0038                14     DPTH EQU 38H
+  0039                15     BLINK_COUNTER EQU 39H
+  0021                16     CS_BOTTOM EQU 21H 
+  0022                17     IR_BOTTOM EQU 22H 
+  0023                18     BLINK EQU 23H
+  0020                19     TO EQU 20H  
+                      20     
+0000                  21     ORG 0000H
+0000 02001E           22     LJMP MAIN
+0003                  23     ORG 0003H
+0003 02011F           24     LJMP MODSET
+000B                  25     ORG 000BH
+000B 020134           26     LJMP TIMEOUT
+0013                  27     ORG 0013H
+0013 020141           28     LJMP CHOSE_OR_START
+001B                  29     ORG 001BH
+001B 02014C           30     LJMP INC_OR_RESET 
+                      31     
+001E                  32     MAIN:
+001E                  33     INIT:
+001E C222             34             CLR IR_BOTTOM
+0020 C221             35             CLR CS_BOTTOM
+0022 7536F7           36             MOV SET_WHITCH,#11110111B
+0025 753920           37             MOV BLINK_COUNTER,#20H
+0028 75390A           38             MOV BLINK_COUNTER,#10
+002B 75A0EF           39             MOV P2,#11101111B
+002E 7830             40             MOV R0,#30H 
+0030 7F14             41             MOV R7,#20
+                      42             
+0032 C220             43             CLR TO
+0034 753500           44             MOV MOD_CHOSE,#00H
+0037 753810           45             MOV DPTH,#10H
+003A 753700           46             MOV DPTL,#00H
+003D 7580C0           47             MOV P0,#NUM0
+0040 758150           48             MOV SP,#50H
+0043 758C3C           49             MOV TH0,#3CH
+0046 758AB0           50             MOV TL0,#0B0H
+0049 758DFF           51             MOV TH1,#0FFH
+004C 758BFF           52             MOV TL1,#0FFH
+004F 758961           53             MOV TMOD,#01100001B 
+0052 75B80D           54             MOV IP,#00001101B 
+0055 758855           55             MOV TCON,#01010101B 
+0058 75A883           56             MOV IE,  #10000011B 
+                      57     
+005B                  58     CLOCK:
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     2
+
+005B D28C             59             SETB TR0
+005D 75A883           60             MOV IE,  #10000011B
+0060 E5A0             61             MOV A,P2
+0062 03               62             RR A
+0063 B47F05           63             CJNE A,#01111111B,LOOP_NEXT
+0066 74F7             64                     MOV A, #11110111B
+0068 7580FF           65                     MOV P0,#0FFH    
+006B                  66             LOOP_NEXT:
+006B F5A0             67             MOV P2,A
+006D E6               68             MOV A,@R0
+006E 901100           69             MOV DPTR,#1100H
+0071 93               70             MOVC A,@A+DPTR
+0072 F580             71             MOV P0,A
+0074 A2A1             72             MOV C,P2.1
+0076 9287             73             MOV P0.7,C
+0078                  74             SEC_NEXT:
+0078 08               75             INC R0
+0079 B83402           76             CJNE R0,#34H,R0_NEXT
+007C 7830             77                     MOV R0,#30H
+007E                  78             R0_NEXT:
+007E 102006           79             JBC TO,LOOP_INCREASE 
+0081 120157           80             LCALL DELAY
+0084 020116           81             LJMP WHITCH_MOD
+0087                  82             LOOP_INCREASE:
+0087 118B             83             ACALL INCREASE
+0089 80F3             84             SJMP R0_NEXT
+                      85     
+008B                  86     INCREASE:
+008B 0530             87                     INC 30H
+008D 7930             88                     MOV R1,#30H
+008F B70A23           89                     CJNE @R1,#0AH,INC_BREAK 
+0092 7700             90                             MOV @R1,#00H
+0094 09               91                             INC R1
+0095 07               92                             INC @R1
+0096 B7061C           93                             CJNE @R1,#06H,INC_BREAK
+0099 7700             94                                     MOV @R1,#00H
+009B 09               95                                     INC R1
+009C 07               96                                     INC@R1
+009D B7040C           97                                     CJNE @R1,#04H,INC_NEXT
+00A0 07               98                                             INC @R1
+00A1 B70208           99                                             CJNE @R1,#02H,INC_NEXT
+00A4 753200          100                                                     MOV 32H,#00H
+00A7 7700            101                                                     MOV @R1,#00H
+00A9 0200B5          102                                                     LJMP INC_BREAK
+00AC                 103                                     INC_NEXT:
+00AC 7932            104                                             MOV R1,#32H
+00AE B70A04          105                                             CJNE @R1,#0AH,INC_BREAK
+00B1 C232            106                                                     CLR 32H
+00B3 0533            107                                                     INC 33H
+00B5                 108     INC_BREAK:   
+00B5 22              109     RET
+                     110     
+00B6                 111     TSET:
+00B6 C28C            112             CLR TR0
+00B8 75A88F          113             MOV IE,  #10001111B
+00BB E5A0            114             MOV A,P2
+00BD 302301          115             JNB BLINK,TSET_NEXT0
+00C0 03              116             RR A
+00C1                 117             TSET_NEXT0:
+00C1 03              118             RR A
+00C2 B47F02          119             CJNE A,#01111111B,TSET_NEXT
+00C5 74F7            120                     MOV A, #11110111B       
+00C7                 121             TSET_NEXT:
+00C7 B53608          122             CJNE A,SET_WHITCH,TSET_NEXT1
+00CA D53905          123                      DJNZ BLINK_COUNTER,TSET_NEXT1
+00CD 102302          124                             JBC BLINK,TSET_NEXT1
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     3
+
+00D0 D223            125                                     SETB BLINK                               
+00D2                 126             TSET_NEXT1:
+00D2 302302          127             JNB BLINK,TSET_NEXT2
+00D5 8009            128                     SJMP INC_R0
+00D7                 129             TSET_NEXT2:     
+00D7 F5A0            130             MOV P2,A
+00D9 E6              131             MOV A,@R0
+00DA 901100          132             MOV DPTR,#1100H
+00DD 93              133             MOVC A,@A+DPTR
+00DE F580            134             MOV P0,A
+00E0                 135             INC_R0:
+00E0 08              136             INC R0
+00E1 B83402          137             CJNE R0,#34H,TSET_R0_NEXT
+00E4 7830            138                     MOV R0,#30H
+00E6                 139             TSET_R0_NEXT:
+00E6 3157            140             ACALL DELAY
+                     141             
+00E8 102120          142             JBC CS_BOTTOM,TSET_NEXT4
+00EB E536            143                     MOV A,SET_WHITCH
+00ED 03              144                     RR A
+00EE B47F02          145                     CJNE A,#01111111B,SET_WHITCH_NEXT
+00F1 74F7            146                             MOV A, #11110111B
+00F3                 147                     SET_WHITCH_NEXT:
+00F3 F536            148                     MOV SET_WHITCH,A
+                     149     
+                     150             
+00F5 102213          151             JBC IR_BOTTOM,TSET_NEXT4 
+00F8 E536            152             MOV A,SET_WHITCH
+00FA 20E002          153             JB ACC.0,IR_NEXT0
+00FD 0530            154                     INC 30H
+00FF                 155             IR_NEXT0:
+00FF 20E102          156             JB ACC.1,IR_NEXT1
+0102 0531            157                     INC 31H
+0104                 158             IR_NEXT1:
+0104 20E202          159             JB ACC.2,IR_NEXT2
+0107 0532            160                     INC 32H
+0109                 161             IR_NEXT2:
+0109 0533            162                     INC 33H                 
+010B 020116          163     TSET_NEXT4:LJMP WHITCH_MOD
+                     164     
+010E                 165     TCOUNTER:
+010E C28C            166             CLR TR0
+0110 75A88F          167             MOV IE,  #10001111B
+                     168     
+0113 020116          169     LJMP WHITCH_MOD
+                     170     
+                     171     
+0116                 172     WHITCH_MOD:
+0116 853883          173             MOV DPH,DPTH
+0119 853782          174             MOV DPL,DPTL
+011C E535            175             MOV A,MOD_CHOSE
+011E 73              176             JMP @A+DPTR
+                     177     
+                     178             
+                     179     
+                     180     
+011F                 181     MODSET: 
+011F C2AF            182             CLR EA
+0121 C0E0            183             PUSH ACC
+0123 E535            184             MOV A,MOD_CHOSE
+0125 2403            185             ADD A,#03H
+0127 F535            186             MOV MOD_CHOSE,A
+0129 B40903          187             CJNE A,#09H,SET_EXIT
+012C 753500          188                     MOV MOD_CHOSE,#00H
+012F                 189             SET_EXIT:
+012F D0E0            190             POP     ACC
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     4
+
+0131 D2AF            191             SETB EA
+0133 32              192     RETI
+                     193     
+                     194     
+0134                 195     TIMEOUT: 
+0134 758C3C          196             MOV TH0,#3CH
+0137 758AB0          197             MOV TL0,#0B0H
+013A DF04            198                     DJNZ R7,TOBREAK
+013C 7F14            199                             MOV R7,#20
+013E D220            200                             SETB TO 
+                     201     
+0140                 202     TOBREAK:
+0140 32              203     RETI
+                     204     
+0141                 205     CHOSE_OR_START:
+0141 C2AF            206     CLR EA
+0143 C0E0            207     PUSH ACC
+                     208             
+                     209     
+                     210     
+                     211     
+                     212     
+                     213     
+0145 D221            214     SETB CS_BOTTOM
+0147 D0E0            215     POP ACC
+0149 D2AF            216     SETB EA
+014B 32              217     RETI
+                     218      
+                     219     
+                     220     
+014C                 221     INC_OR_RESET:
+014C C2AF            222     CLR EA
+014E C0E0            223     PUSH ACC
+                     224             
+                     225     
+                     226     
+                     227     
+                     228     
+                     229     
+0150 D222            230     SETB IR_BOTTOM
+0152 D0E0            231     POP ACC
+0154 D2AF            232     SETB EA
+                     233             
+0156 32              234     RETI
+                     235     
+0157                 236     DELAY:
+0157 7E07            237             MOV R6,#07H
+0159                 238             DELAY_LOOP:
+0159 7D00            239                     MOV R5,#00H
+015B DDFE            240                     DJNZ R5,$
+015D DEFA            241             DJNZ R6,DELAY_LOOP
+015F 22              242     RET
+1000                 243     ORG 1000H
+1000 02005B          244     LJMP CLOCK
+1003                 245     ORG 1003H
+1003 0200B6          246     LJMP TSET
+1006                 247     ORG 1006H
+1006 02010E          248     LJMP TCOUNTER
+1100                 249     ORG 1100H
+1100 C0F9A4B0        250     DB      NUM0,NUM1,NUM2,NUM3,NUM4,NUM5,NUM6,NUM7,NUM8,NUM9
+1104 999282F8                
+1108 8090                    
+                     251     
+                     252     END
+                             
+                             
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     5
+
+                                     
+                                     
+                             
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     6
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+BLINK. . . . . . .  N NUMB   0023H   A   
+BLINK_COUNTER. . .  N NUMB   0039H   A   
+CHOSE_OR_START . .  C ADDR   0141H   A   
+CLOCK. . . . . . .  C ADDR   005BH   A   
+CS_BOTTOM. . . . .  N NUMB   0021H   A   
+DELAY. . . . . . .  C ADDR   0157H   A   
+DELAY_LOOP . . . .  C ADDR   0159H   A   
+DPH. . . . . . . .  D ADDR   0083H   A   
+DPL. . . . . . . .  D ADDR   0082H   A   
+DPTH . . . . . . .  N NUMB   0038H   A   
+DPTL . . . . . . .  N NUMB   0037H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+IE . . . . . . . .  D ADDR   00A8H   A   
+INCREASE . . . . .  C ADDR   008BH   A   
+INC_BREAK. . . . .  C ADDR   00B5H   A   
+INC_NEXT . . . . .  C ADDR   00ACH   A   
+INC_OR_RESET . . .  C ADDR   014CH   A   
+INC_R0 . . . . . .  C ADDR   00E0H   A   
+INIT . . . . . . .  C ADDR   001EH   A   
+IP . . . . . . . .  D ADDR   00B8H   A   
+IR_BOTTOM. . . . .  N NUMB   0022H   A   
+IR_NEXT0 . . . . .  C ADDR   00FFH   A   
+IR_NEXT1 . . . . .  C ADDR   0104H   A   
+IR_NEXT2 . . . . .  C ADDR   0109H   A   
+LOOP_INCREASE. . .  C ADDR   0087H   A   
+LOOP_NEXT. . . . .  C ADDR   006BH   A   
+MAIN . . . . . . .  C ADDR   001EH   A   
+MODSET . . . . . .  C ADDR   011FH   A   
+MOD_CHOSE. . . . .  N NUMB   0035H   A   
+NUM0 . . . . . . .  N NUMB   00C0H   A   
+NUM1 . . . . . . .  N NUMB   00F9H   A   
+NUM2 . . . . . . .  N NUMB   00A4H   A   
+NUM3 . . . . . . .  N NUMB   00B0H   A   
+NUM4 . . . . . . .  N NUMB   0099H   A   
+NUM5 . . . . . . .  N NUMB   0092H   A   
+NUM6 . . . . . . .  N NUMB   0082H   A   
+NUM7 . . . . . . .  N NUMB   00F8H   A   
+NUM8 . . . . . . .  N NUMB   0080H   A   
+NUM9 . . . . . . .  N NUMB   0090H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+R0_NEXT. . . . . .  C ADDR   007EH   A   
+SEC_NEXT . . . . .  C ADDR   0078H   A   
+SET_EXIT . . . . .  C ADDR   012FH   A   
+SET_WHITCH . . . .  N NUMB   0036H   A   
+SET_WHITCH_NEXT. .  C ADDR   00F3H   A   
+SP . . . . . . . .  D ADDR   0081H   A   
+TCON . . . . . . .  D ADDR   0088H   A   
+TCOUNTER . . . . .  C ADDR   010EH   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TIMEOUT. . . . . .  C ADDR   0134H   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TO . . . . . . . .  N NUMB   0020H   A   
+TOBREAK. . . . . .  C ADDR   0140H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TSET . . . . . . .  C ADDR   00B6H   A   
+A51 MACRO ASSEMBLER  MAIN                                                                 05/29/2021 18:54:48 PAGE     7
+
+TSET_NEXT. . . . .  C ADDR   00C7H   A   
+TSET_NEXT0 . . . .  C ADDR   00C1H   A   
+TSET_NEXT1 . . . .  C ADDR   00D2H   A   
+TSET_NEXT2 . . . .  C ADDR   00D7H   A   
+TSET_NEXT4 . . . .  C ADDR   010BH   A   
+TSET_R0_NEXT . . .  C ADDR   00E6H   A   
+WHITCH_MOD . . . .  C ADDR   0116H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
